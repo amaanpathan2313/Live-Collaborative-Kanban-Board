@@ -1,7 +1,19 @@
+
 import React, { useState } from "react";
 import "./Todo.css";
+import {
+  addTodo,
+  changeTodoStatus,
+  deleteTodo,
+} from "../../features/todoSlice";
+import { useSelector, useDispatch } from "react-redux";
+import useDebounce from "../../hooks/useDebounce";
 
 const Todo = () => {
+  const dispatch = useDispatch();
+
+  const todosArray = useSelector((state) => state.todos.items);
+
   const [todoObj, setTodoObj] = useState({
     title: "",
     description: "",
@@ -9,26 +21,29 @@ const Todo = () => {
     tag: "",
   });
 
-  const [todoArray, setTodoArray] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearch = useDebounce(searchTerm, 300);
 
   function handelChange(e) {
-    let { value, name } = e.target;
-
-    setTodoObj((previous) => ({ ...previous, [name]: value }));
-  } // handelChange
+    const { name, value } = e.target;
+    setTodoObj((prev) => ({ ...prev, [name]: value }));
+  }
 
   function handelSubmit(e) {
     e.preventDefault();
 
-    let tagsArray = todoObj.tag.split(",").map((tag) => tag.trim());
-    console.log("t : ", tagsArray);
+    const tagsArray = todoObj.tag
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag !== "");
+
     const newTodo = {
       ...todoObj,
       id: Date.now().toString(),
       tagsArray,
     };
-    console.log(newTodo);
-    setTodoArray([...todoArray, newTodo]);
+
+    dispatch(addTodo(newTodo));
 
     setTodoObj({
       title: "",
@@ -36,41 +51,46 @@ const Todo = () => {
       status: false,
       tag: "",
     });
-  } // handel Submit
-
-  // ---------------------------------------    Drag function
+  }
 
   function allowDrop(e) {
     e.preventDefault();
   }
 
-  function drag(e) {
-    // console.log("I am ID  :::", e.target.id)
-
-    e.dataTransfer.setData("todoId", e.target.id);
+  function drag(e, id) {
+    e.dataTransfer.setData("todoId", id);
   }
 
   function drop(e) {
     e.preventDefault();
-
     const id = e.dataTransfer.getData("todoId");
 
-    const updatedArray = todoArray.map((ele) => {
-      if (ele.id === id) {
-        return { ...ele, status: !ele.status };
-      }
-      return ele;
-    });
-
-    setTodoArray(updatedArray);
-    console.log(updatedArray);
+    dispatch(changeTodoStatus(id));
   }
 
-  //  -------------------------------------
+  function handleSearch(e) {
+    setSearchTerm(e.target.value);
+  }
+
+   const filteredTodos = todosArray.filter((todo) => {
+    if (!debouncedSearch) return true;
+
+    return todo.tagsArray?.some((tag) =>
+      tag.toLowerCase().includes(debouncedSearch.toLowerCase())
+    );
+  });
+
+  const pendingTodos = filteredTodos.filter(
+    (t) => t.status === false
+  );
+
+  const completedTodos = filteredTodos.filter(
+    (t) => t.status === true
+  );
 
   return (
     <>
-      <h1>Todo App </h1>
+      <h1>Todo App</h1>
 
       <form onSubmit={handelSubmit}>
         <input
@@ -79,97 +99,110 @@ const Todo = () => {
           value={todoObj.title}
           placeholder="Enter Title"
           onChange={handelChange}
+          required
         />
 
         <textarea
           name="description"
           value={todoObj.description}
           onChange={handelChange}
-          placeholder="Enter your task in detail"
-        ></textarea>
+          placeholder="Enter your task"
+          required
+        />
 
         <input
           type="text"
-          placeholder="Enter your tag and separate it using ,"
           name="tag"
           value={todoObj.tag}
           onChange={handelChange}
+          placeholder="Enter tags (comma separated)"
         />
 
         <button type="submit">Add Task</button>
       </form>
 
+      {/* -------- SEARCH -------- */}
       <div className="search-box">
-        <input type="text" placeholder="Search task by tags " />
+        <input
+          type="text"
+          placeholder="Search task by tags"
+          value={searchTerm}
+          onChange={handleSearch}
+        />
       </div>
 
       <div className="Box-1">
         <div
           className="todo-column"
-          onDrop={(e) => drop(e)}
-          onDragOver={(e) => allowDrop(e)}
+          onDrop={drop}
+          onDragOver={allowDrop}
         >
-          <h2>Pending Tasks</h2>
-          <div className="pending-todo">
-            {Array.isArray(todoArray) &&
-              todoArray
-                .filter((ele) => ele.status == false)
-                .map((ele) => (
-                  <div
-                    className="todo-card"
-                    draggable="true"
-                    onDragStart={(e) => drag(e)}
-                    id={ele.id}
-                  >
-                    <h3>Title : {ele.title}</h3>
-                    <p>{ele.description}</p>
+          <h2>Pending</h2>
 
-                    <div className="tag-container">
-                      <h4>Tags:</h4>
-                      {ele.tagsArray &&
-                        ele.tagsArray.map((tag, index) => (
-                          <span key={index} className="tag-chip">
-                            {tag}
-                          </span>
-                        ))}
-                    </div>
-                  </div>
+          {pendingTodos.length === 0 && <p>No tasks found</p>}
+
+          {pendingTodos.map((ele) => (
+            <div
+              key={ele.id}
+              className="todo-card"
+              draggable
+              onDragStart={(e) => drag(e, ele.id)}
+            >
+              <h3>{ele.title}</h3>
+              <p>{ele.description}</p>
+
+              <div className="tag-container">
+                {ele.tagsArray?.map((tag, index) => (
+                  <span key={index} className="tag-chip">
+                    {tag}
+                  </span>
                 ))}
-          </div>
+              </div>
+
+              <button
+                onClick={() => dispatch(deleteTodo(ele.id))}
+              >
+                Delete
+              </button>
+            </div>
+          ))}
         </div>
 
+        {/* -------- COMPLETED -------- */}
         <div
           className="todo-column"
-          onDrop={(e) => drop(e)}
-          onDragOver={(e) => allowDrop(e)}
+          onDrop={drop}
+          onDragOver={allowDrop}
         >
           <h2>Completed</h2>
-          <div className="pending-todo">
-            {Array.isArray(todoArray) &&
-              todoArray
-                .filter((ele) => ele.status == true)
-                .map((ele) => (
-                  <div
-                    className="todo-card"
-                    draggable="true"
-                    onDragStart={(e) => drag(e)}
-                    id={ele.id}
-                  >
-                    <h3>{ele.title}</h3>
-                    <p>{ele.description}</p>
 
-                    <div className="tag-container">
-                      <h4>Tags:</h4>
-                      {ele.tagsArray &&
-                        ele.tagsArray.map((tag, index) => (
-                          <span key={index} className="tag-chip">
-                            {tag}
-                          </span>
-                        ))}
-                    </div>
-                  </div>
+          {completedTodos.length === 0 && <p>No tasks found</p>}
+
+          {completedTodos.map((ele) => (
+            <div
+              key={ele.id}
+              className="todo-card"
+              draggable
+              onDragStart={(e) => drag(e, ele.id)}
+            >
+              <h3>{ele.title}</h3>
+              <p>{ele.description}</p>
+
+              <div className="tag-container">
+                {ele.tagsArray?.map((tag, index) => (
+                  <span key={index} className="tag-chip">
+                    {tag}
+                  </span>
                 ))}
-          </div>
+              </div>
+
+              <button
+                onClick={() => dispatch(deleteTodo(ele.id))}
+              >
+                Delete
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     </>

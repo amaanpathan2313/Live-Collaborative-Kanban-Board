@@ -163,6 +163,10 @@ button:hover {
     margin-top: 12px;
 }
 
+.del{
+    margin-top: 1vh;
+}
+
 .tag-container h4 {
     font-size: 0.85rem;
     color: #444;
