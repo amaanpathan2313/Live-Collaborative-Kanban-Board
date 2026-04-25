@@ -5,8 +5,6 @@ A **real-time collaborative Kanban Board** that allows multiple users to manage 
 ---
 
 🌐 Live Demo
-
-👉 View Deployed App:
 https://cosmic-gecko-d26c93.netlify.app/
 
 ## 📌 Overview
