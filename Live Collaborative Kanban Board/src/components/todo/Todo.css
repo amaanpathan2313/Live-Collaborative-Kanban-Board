@@ -1,0 +1,251 @@
+ 
+
+ @import url('https://googleapis.com');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column; /* Allows content to stack vertically */
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 50px;
+    min-height: 100vh;
+    background: radial-gradient(circle at top left, #667eea, #764ba2, #4b2c70);
+    background-attachment: fixed;
+}
+
+h1 {
+    color: white;
+    font-weight: 800;
+    font-size: 3rem;
+    margin-bottom: 30px;
+    letter-spacing: -1px;
+    text-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+/* --- Styled Form --- */
+form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 2.5rem;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    width: 100%;
+    /* max-width: 450px; */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border: 1px solid rgba(255,255,255,0.3);
+    /* border: 2px solid black; */
+}
+
+input, textarea {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #eee;
+    border-radius: 14px;
+    outline: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #f9f9f9;
+}
+
+input:focus, textarea:focus {
+    border-color: #764ba2;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.15);
+}
+
+button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0 8px 15px rgba(118, 75, 162, 0.3);
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 20px rgba(118, 75, 162, 0.4);
+    filter: brightness(1.1);
+}
+
+
+
+/* --- Todo Columns --- */
+.Box-1 {
+    display: flex;
+    gap: 30px;
+    margin-top: 50px;
+    width: 95vw;
+    max-width: 1000px;
+    padding-bottom: 50px;
+}
+
+.todo-column {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    padding: 25px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-height: 500px;
+    transition: all 0.4s ease;
+}
+
+.todo-column:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.todo-column h2 {
+    color: white;
+    margin-bottom: 25px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* --- Card Design --- */
+.todo-card {
+    background: white;
+    padding: 20px;
+    border-radius: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    cursor: grab;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: slideUp 0.5s ease forwards;
+    border-left: 8px solid transparent;
+}
+
+.todo-card:active {
+    cursor: grabbing;
+    transform: scale(0.95);
+}
+
+.todo-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+}
+
+.todo-card h3 {
+    color: #1a1a1a;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.todo-card p {
+    color: #636e72;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Tags */
+
+.tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.tag-container h4 {
+    font-size: 0.85rem;
+    color: #444;
+    font-weight: 700;
+}
+
+.tag-chip {
+    background: #f0f0f0;
+    color: #764ba2; /* Matches your theme */
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid rgba(118, 75, 162, 0.1);
+    transition: all 0.2s ease;
+}
+
+.tag-chip:hover {
+    background: #764ba2;
+    color: white;
+    transform: translateY(-1px);
+}
+
+
+/* --- Visual Status Indicators --- */
+.todo-column:nth-child(1) .todo-card { border-left-color: #ff9f43; } /* Pending */
+.todo-column:nth-child(2) .todo-card { border-left-color: #00d2d3; } /* Completed */
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive tweak */
+@media (max-width: 768px) {
+    .Box-1 { flex-direction: column; align-items: center; }
+    .todo-column { width: 100%; }
+}
+
+
+/* ---------   Search Box ----------- */
+
+/* Container to center the search box */
+.search-box {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+    padding: 0 20px;
+}
+
+.search-box input {
+    width: 100%;
+    max-width: 500px;
+    padding: 16px 30px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: white;
+    background: rgba(255, 255, 255, 0.12); /* Glass effect */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 100px; /* Modern pill shape */
+    outline: none;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Styling the placeholder text */
+.search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.5px;
+}
+
+/* Interactive Hover & Focus states */
+.search-box input:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.search-box input:focus {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: #ffffff;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px); /* Slight lift on focus */
+}
